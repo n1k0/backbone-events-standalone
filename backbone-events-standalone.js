@@ -18,7 +18,7 @@
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
  */
-/* global define, module */
+/* global exports:true, define, module */
 (function() {
   var root = this,
       breaker = {},
@@ -262,7 +262,6 @@
       return Events;
     });
   } else if (typeof exports !== 'undefined') {
-    var exports;
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = Events;
     }
