@@ -57,9 +57,8 @@ myEventEmitter.on("foo", console.log).trigger("foo", "hello emitter");
 
 // alternatively
 function Plop() {}
-BackboneEvents.__mixin(Plop);
-
-new Plop().on("foo", console.log).trigger("foo", "hello emitter");
+BackboneEvents.__mixin(Plop.prototype);
+(new Plop()).on("foo", console.log).trigger("foo", "hello emitter");
 ```
 
 `BackboneEvents` API & usage is the same as [Backbone.Events].
