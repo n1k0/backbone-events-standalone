@@ -1,6 +1,8 @@
 backbone-events-standalone
 ==========================
 
+[![Build Status](https://travis-ci.org/n1k0/backbone-events-standalone.png)](https://travis-ci.org/n1k0/backbone-events-standalone)
+
 This is an extraction of the [Events] module of [Backbone] which can be used
 standalone (no external dependency), in the browser or in a nodejs environment.
 
