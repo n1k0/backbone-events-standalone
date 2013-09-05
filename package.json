@@ -21,7 +21,9 @@
     "mocha": "1.8.x",
     "chai": "1.5.x",
     "jshint": "2.x",
-    "underscore": "1.4.4"
+    "underscore": "1.4.x",
+    "grunt": "0.4.x",
+    "grunt-contrib-uglify": "0.2.x"
   },
   "scripts": {
     "test": "mocha"

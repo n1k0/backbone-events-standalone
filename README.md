@@ -19,13 +19,13 @@ browser tests.
 
 ## Installation
 
-### Bower
+### Bower (for browser use)
 
 ```
 $ bower install backbone-events-standalone
 ```
 
-### NPM
+### NPM (node)
 
 ```
 $ npm install backbone-events-standalone
@@ -33,7 +33,7 @@ $ npm install backbone-events-standalone
 
 ## Usage
 
-### In the browser
+### Standard browser use
 
 ```html
 <script src="backbone-events-standalone.js"></script>
@@ -42,7 +42,20 @@ $ npm install backbone-events-standalone
 </script>
 ```
 
-### In nodejs
+**Notes:**
+
+- You may want to use the minified version stored in `backbone-events-standalone.min.js`.
+- Using Bower, files are usually available within `bower_components/backbone-events-standalone`
+
+### AMD
+
+```js
+require(["backbone-events-standalone"], function(BackboneEvents) {
+  // ...
+});
+```
+
+### In nodejs/browserify
 
 ```js
 var BackboneEvents = require("backbone-events-standalone");
