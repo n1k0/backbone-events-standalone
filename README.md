@@ -21,7 +21,9 @@ browser tests.
 
 ### Bower
 
-TODO
+```
+$ bower install backbone-events-standalone
+```
 
 ### NPM
 
