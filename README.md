@@ -51,7 +51,7 @@ var BackboneEvents = require("backbone-events-standalone");
 The `__mixin` method helps extending any object or prototype to add eventing
 support to it:
 
-```
+```js
 var myEventEmitter = BackboneEvents.__mixin({});
 myEventEmitter.on("foo", console.log).trigger("foo", "hello emitter");
 
