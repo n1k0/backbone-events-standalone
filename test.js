@@ -6,16 +6,16 @@ var BackboneEvents = require("./index");
 
 describe("BackboneEvents", function() {
   // added by backbone-events-standalone
-  describe("#__mixin", function() {
+  describe("#mixin", function() {
     it("should add the Events mixin to passed prototype", function() {
       var target = {};
-      BackboneEvents.__mixin(target);
+      BackboneEvents.mixin(target);
       var expected = "on,once,off,trigger,stopListening".split(",");
       expect(target).to.include.keys(expected);
     });
 
     it("should return augmented object", function(done) {
-      BackboneEvents.__mixin({}).on("foo", function(message) {
+      BackboneEvents.mixin({}).on("foo", function(message) {
         expect(message).eql("hello emitter");
         done();
       }).trigger("foo", "hello emitter");
@@ -23,7 +23,7 @@ describe("BackboneEvents", function() {
 
     it("should augment an existing prototype", function(done) {
       function Plop() {}
-      BackboneEvents.__mixin(Plop.prototype);
+      BackboneEvents.mixin(Plop.prototype);
       (new Plop()).on("foo", function(message) {
         expect(message).eql("hello emitter");
         done();
@@ -34,7 +34,7 @@ describe("BackboneEvents", function() {
   // ported from Backbone.Events tests
   it("#on, #trigger", function() {
     var obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
     obj.on('event', function() { obj.counter += 1; });
     obj.trigger('event');
     expect(obj.counter).to.equal(1);
@@ -47,7 +47,7 @@ describe("BackboneEvents", function() {
 
   it("binding and triggering multiple events", function() {
     var obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
 
     obj.on('a b c', function() { obj.counter += 1; });
 
@@ -67,7 +67,7 @@ describe("BackboneEvents", function() {
 
   it("binding and triggering with event maps", function() {
     var obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
 
     var increment = function() {
       this.counter += 1;
@@ -191,7 +191,7 @@ describe("BackboneEvents", function() {
 
   it("trigger all for each event", function() {
     var a, b, obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
     obj.on('all', function(event) {
       obj.counter++;
       if (event == 'a') a = true;
@@ -229,7 +229,7 @@ describe("BackboneEvents", function() {
 
   it("unbind a callback in the midst of it firing", function() {
     var obj = {counter: 0};
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
     var callback = function() {
       obj.counter += 1;
       obj.off('event', callback);
@@ -270,7 +270,7 @@ describe("BackboneEvents", function() {
 
   it("nested trigger with unbind", function () {
     var obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
     var incr1 = function(){ obj.counter += 1; obj.off('event', incr1); obj.trigger('event'); };
     var incr2 = function(){ obj.counter += 1; };
     obj.on('event', incr1);
@@ -295,7 +295,7 @@ describe("BackboneEvents", function() {
 
   it("#1282 - 'all' callback list is retrieved after each event.", function() {
     var counter = 0;
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     var incr = function(){ counter++; };
     obj.on('x', function() {
       obj.on('y', incr).on('all', incr);
@@ -318,7 +318,7 @@ describe("BackboneEvents", function() {
     });
 
   it("remove all events for a specific context", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     obj.on('x y all', function() { expect(true).ok; });
     obj.on('x y all', function() { expect(false).ok; }, obj);
     obj.off(null, null, obj);
@@ -326,7 +326,7 @@ describe("BackboneEvents", function() {
   });
 
   it("remove all events for a specific callback", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     var success = function() { expect(true).ok; };
     var fail = function() { expect(false).ok; };
     obj.on('x y all', success);
@@ -336,7 +336,7 @@ describe("BackboneEvents", function() {
   });
 
   it("#1310 - off does not skip consecutive events", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     obj.on('event', function() { expect(false).ok; }, obj);
     obj.on('event', function() { expect(false).ok; }, obj);
     obj.off(null, null, obj);
@@ -346,7 +346,7 @@ describe("BackboneEvents", function() {
   it("once", function() {
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = { counterA: 0, counterB: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
     var incrA = function(){ obj.counterA += 1; obj.trigger('event'); };
     var incrB = function(){ obj.counterB += 1; };
     obj.once('event', incrA);
@@ -370,7 +370,7 @@ describe("BackboneEvents", function() {
 
   it("once variant two", function() {
     var f = function(){ expect(true).ok; };
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
 
     obj
       .once('event', f)
@@ -381,7 +381,7 @@ describe("BackboneEvents", function() {
 
   it("once with off", function() {
     var f = function(){ expect(true).ok; };
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
 
     obj.once('event', f);
     obj.off('event', f);
@@ -390,7 +390,7 @@ describe("BackboneEvents", function() {
 
   it("once with event maps", function() {
     var obj = { counter: 0 };
-    BackboneEvents.__mixin(obj);
+    BackboneEvents.mixin(obj);
 
     var increment = function() {
       this.counter += 1;
@@ -417,7 +417,7 @@ describe("BackboneEvents", function() {
 
   it("once with off only by context", function() {
     var context = {};
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     obj.once('event', function(){ expect(false).ok; }, context);
     obj.off(null, null, context);
     obj.trigger('event');
@@ -432,13 +432,13 @@ describe("BackboneEvents", function() {
   });
 
   it("once with multiple events.", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     obj.once('x y', function() { expect(true).ok; });
     obj.trigger('x y');
   });
 
   it("Off during iteration with once.", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     var f = function(){ this.off('event', f); };
     obj.on('event', f);
     obj.once('event', function(){});
@@ -453,7 +453,7 @@ describe("BackboneEvents", function() {
   });
 
   it("event functions are chainable", function() {
-    var obj = BackboneEvents.__mixin({});
+    var obj = BackboneEvents.mixin({});
     var obj2 = _.extend({}, BackboneEvents);
     var fn = function() {};
     expect(obj).eql(obj.trigger('noeventssetyet'));

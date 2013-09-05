@@ -50,16 +50,16 @@ var BackboneEvents = require("backbone-events-standalone");
 
 ### API
 
-The `__mixin` method helps extending any object or prototype to add eventing
+The `BackboneEvents#mixin` method helps extending any object or prototype to add eventing
 support to it:
 
 ```js
-var myEventEmitter = BackboneEvents.__mixin({});
+var myEventEmitter = BackboneEvents.mixin({});
 myEventEmitter.on("foo", console.log).trigger("foo", "hello emitter");
 
 // alternatively
 function Plop() {}
-BackboneEvents.__mixin(Plop.prototype);
+BackboneEvents.mixin(Plop.prototype);
 (new Plop()).on("foo", console.log).trigger("foo", "hello emitter");
 ```
 

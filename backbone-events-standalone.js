@@ -7,13 +7,13 @@
  * support to some given object. A `mixin()` method has been added to the Events
  * prototype to avoid using underscore for that sole purpose:
  *
- *     var myEventEmitter = BackboneEvents.__mixin({});
+ *     var myEventEmitter = BackboneEvents.mixin({});
  *
  * Or for a function constructor:
  *
  *     function MyConstructor(){}
  *     MyConstructor.prototype.foo = function(){}
- *     BackboneEvents.__mixin(MyConstructor.prototype);
+ *     BackboneEvents.mixin(MyConstructor.prototype);
  *
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
@@ -253,7 +253,7 @@
   Events.unbind = Events.off;
 
   // Mixin utility
-  Events.__mixin = function(proto) {
+  Events.mixin = function(proto) {
     return _.extend(proto, this);
   };
 
