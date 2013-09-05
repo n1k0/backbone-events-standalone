@@ -241,7 +241,7 @@ describe("BackboneEvents", function() {
     expect(obj.counter).eql(1, 'the callback should have been unbound.');
   });
 
-  it("two binds that unbind themeselves", function() {
+  it("two binds that unbind themselves", function() {
     var obj = { counterA: 0, counterB: 0 };
     _.extend(obj,BackboneEvents);
     var incrA = function(){ obj.counterA += 1; obj.off('event', incrA); };
