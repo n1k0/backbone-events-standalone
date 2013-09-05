@@ -7,13 +7,13 @@
  * support to some given object. A `mixin()` method has been added to the Events
  * prototype to avoid using underscore for that sole purpose:
  *
- *     var myEventEmitter = Backbone.Events.__mixin({});
+ *     var myEventEmitter = BackboneEvents.__mixin({});
  *
  * Or for a function constructor:
  *
  *     function MyConstructor(){}
  *     MyConstructor.prototype.foo = function(){}
- *     Backbone.Events.__mixin(MyConstructor.prototype);
+ *     BackboneEvents.__mixin(MyConstructor.prototype);
  *
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
@@ -25,11 +25,6 @@
       hasOwnProperty = Object.prototype.hasOwnProperty,
       slice = Array.prototype.slice,
       idCounter = 0;
-
-  // Just skip if Backbone is already available in this context
-  if ('Backbone' in root)
-    return;
-  var Backbone = {};
 
   // Returns a partial implementation matching the minimal API subset required
   // by Backbone.Events
@@ -87,7 +82,9 @@
     };
   }
 
-  var _ = miniscore();
+  var _ = miniscore(),
+      Events,
+      BackboneEvents;
 
   // Backbone.Events
   // ---------------
@@ -102,7 +99,7 @@
   //     object.on('expand', function(){ alert('expanded'); });
   //     object.trigger('expand');
   //
-  var Events = Backbone.Events = {
+  Events = BackboneEvents = {
 
     // Bind an event to a `callback` function. Passing `"all"` will bind
     // the callback to all events fired.
