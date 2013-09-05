@@ -2,9 +2,19 @@
   "name": "backbone-events-standalone",
   "description": "Standalone version of Backbone.Events",
   "version": "1.0.0",
+  "author": "Nicolas Perriault <nicolas@perriault.net>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n1k0/backbone-events-standalone.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "backbone",
+    "events"
+  ],
   "engines": {
     "node": "0.8.x",
-    "npm":"1.1.x"
+    "npm":"1.2.x"
   },
   "dependencies": {},
   "devDependencies": {
@@ -14,6 +24,6 @@
     "underscore": "1.4.4"
   },
   "scripts": {
-    "test": "make test"
+    "test": "mocha"
   }
 }

@@ -1,22 +1,40 @@
-/* global Backbone, chai, describe, it */
-/* jshint expr:true, maxlen:120 */
+/* global chai, describe, it */
+/* jshint expr:true */
 var expect = require("chai").expect;
 var _ = require("underscore");
-require("backbone-events-standalone");
+var BackboneEvents = require(".");
 
-describe("Backbone.Events", function() {
+describe("BackboneEvents", function() {
+  // added by backbone-events-standalone
   describe("#__mixin", function() {
     it("should add the Events mixin to passed prototype", function() {
       var target = {};
-      Backbone.Events.__mixin(target);
+      BackboneEvents.__mixin(target);
       var expected = "on,once,off,trigger,stopListening".split(",");
       expect(target).to.include.keys(expected);
     });
+
+    it("should return augmented object", function(done) {
+      BackboneEvents.__mixin({}).on("foo", function(message) {
+        expect(message).eql("hello emitter");
+        done();
+      }).trigger("foo", "hello emitter");
+    });
+
+    it("should augment an existing prototype", function(done) {
+      function Plop() {}
+      BackboneEvents.__mixin(Plop.prototype);
+      (new Plop()).on("foo", function(message) {
+        expect(message).eql("hello emitter");
+        done();
+      }).trigger("foo", "hello emitter");
+    });
   });
 
+  // ported from Backbone.Events tests
   it("#on, #trigger", function() {
     var obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
     obj.on('event', function() { obj.counter += 1; });
     obj.trigger('event');
     expect(obj.counter).to.equal(1);
@@ -29,7 +47,7 @@ describe("Backbone.Events", function() {
 
   it("binding and triggering multiple events", function() {
     var obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
 
     obj.on('a b c', function() { obj.counter += 1; });
 
@@ -49,7 +67,7 @@ describe("Backbone.Events", function() {
 
   it("binding and triggering with event maps", function() {
     var obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
 
     var increment = function() {
       this.counter += 1;
@@ -79,8 +97,8 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo and stopListening", function() {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     a.listenTo(b, 'all', function(){ expect(true).ok; });
     b.trigger('anything');
     a.listenTo(b, 'all', function(){ expect(false).ok; });
@@ -89,8 +107,8 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo and stopListening with event maps", function() {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     var cb = function(){ expect(true).ok; };
     a.listenTo(b, {event: cb});
     b.trigger('event');
@@ -103,8 +121,8 @@ describe("Backbone.Events", function() {
   });
 
   it("stopListening with omitted args", function () {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     var cb = function () { expect(true).ok; };
     a.listenTo(b, 'event', cb);
     b.on('event', cb);
@@ -119,8 +137,8 @@ describe("Backbone.Events", function() {
   });
 
   it("listenToOnce and stopListening", function() {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     a.listenToOnce(b, 'all', function() { expect(true).ok; });
     b.trigger('anything');
     b.trigger('anything');
@@ -130,8 +148,8 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo, listenToOnce and stopListening", function() {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     a.listenToOnce(b, 'all', function() { expect(true).ok; });
     b.trigger('anything');
     b.trigger('anything');
@@ -141,8 +159,8 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo and stopListening with event maps", function() {
-    var a = _.extend({}, Backbone.Events);
-    var b = _.extend({}, Backbone.Events);
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
     a.listenTo(b, {change: function(){ expect(true).ok; }});
     b.trigger('change');
     a.listenTo(b, {change: function(){ expect(false).ok; }});
@@ -151,13 +169,13 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo yourself", function(){
-    var e = _.extend({}, Backbone.Events);
+    var e = _.extend({}, BackboneEvents);
     e.listenTo(e, "foo", function(){ expect(true).ok; });
     e.trigger("foo");
   });
 
   it("listenTo yourself cleans yourself up with stopListening", function(){
-    var e = _.extend({}, Backbone.Events);
+    var e = _.extend({}, BackboneEvents);
     e.listenTo(e, "foo", function(){ expect(true).ok; });
     e.trigger("foo");
     e.stopListening();
@@ -165,7 +183,7 @@ describe("Backbone.Events", function() {
   });
 
   it("listenTo with empty callback doesn't throw an error", function(){
-    var e = _.extend({}, Backbone.Events);
+    var e = _.extend({}, BackboneEvents);
     e.listenTo(e, "foo", null);
     e.trigger("foo");
     expect(true).ok;
@@ -173,7 +191,7 @@ describe("Backbone.Events", function() {
 
   it("trigger all for each event", function() {
     var a, b, obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
     obj.on('all', function(event) {
       obj.counter++;
       if (event == 'a') a = true;
@@ -187,7 +205,7 @@ describe("Backbone.Events", function() {
 
   it("on, then unbind all functions", function() {
     var obj = { counter: 0 };
-    _.extend(obj,Backbone.Events);
+    _.extend(obj,BackboneEvents);
     var callback = function() { obj.counter += 1; };
     obj.on('event', callback);
     obj.trigger('event');
@@ -198,7 +216,7 @@ describe("Backbone.Events", function() {
 
   it("bind two callbacks, unbind only one", function() {
     var obj = { counterA: 0, counterB: 0 };
-    _.extend(obj,Backbone.Events);
+    _.extend(obj,BackboneEvents);
     var callback = function() { obj.counterA += 1; };
     obj.on('event', callback);
     obj.on('event', function() { obj.counterB += 1; });
@@ -211,7 +229,7 @@ describe("Backbone.Events", function() {
 
   it("unbind a callback in the midst of it firing", function() {
     var obj = {counter: 0};
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
     var callback = function() {
       obj.counter += 1;
       obj.off('event', callback);
@@ -225,7 +243,7 @@ describe("Backbone.Events", function() {
 
   it("two binds that unbind themeselves", function() {
     var obj = { counterA: 0, counterB: 0 };
-    _.extend(obj,Backbone.Events);
+    _.extend(obj,BackboneEvents);
     var incrA = function(){ obj.counterA += 1; obj.off('event', incrA); };
     var incrB = function(){ obj.counterB += 1; obj.off('event', incrB); };
     obj.on('event', incrA);
@@ -245,14 +263,14 @@ describe("Backbone.Events", function() {
       expect(true).ok;
     };
 
-    var obj = _.extend({},Backbone.Events);
-    obj.on('event', function () { this.assertTrue(); }, (new TestClass));
+    var obj = _.extend({},BackboneEvents);
+    obj.on('event', function () { this.assertTrue(); }, (new TestClass()));
     obj.trigger('event');
   });
 
   it("nested trigger with unbind", function () {
     var obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
     var incr1 = function(){ obj.counter += 1; obj.off('event', incr1); obj.trigger('event'); };
     var incr2 = function(){ obj.counter += 1; };
     obj.on('event', incr1);
@@ -262,7 +280,7 @@ describe("Backbone.Events", function() {
   });
 
   it("callback list is not altered during trigger", function () {
-    var counter = 0, obj = _.extend({}, Backbone.Events);
+    var counter = 0, obj = _.extend({}, BackboneEvents);
     var incr = function(){ counter++; };
     obj.on('event', function(){ obj.on('event', incr).on('all', incr); })
     .trigger('event');
@@ -277,7 +295,7 @@ describe("Backbone.Events", function() {
 
   it("#1282 - 'all' callback list is retrieved after each event.", function() {
     var counter = 0;
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     var incr = function(){ counter++; };
     obj.on('x', function() {
       obj.on('y', incr).on('all', incr);
@@ -287,20 +305,20 @@ describe("Backbone.Events", function() {
   });
 
   it("if no callback is provided, `on` is a noop", function() {
-    _.extend({}, Backbone.Events).on('test').trigger('test');
+    _.extend({}, BackboneEvents).on('test').trigger('test');
   });
 
   it("if callback is truthy but not a function, `on` should throw an error" +
      " just like jQuery",
     function() {
-      var view = _.extend({}, Backbone.Events).on('test', 'noop');
+      var view = _.extend({}, BackboneEvents).on('test', 'noop');
       expect(function() {
         view.trigger('test');
       }).to.Throw(Error);
     });
 
   it("remove all events for a specific context", function() {
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     obj.on('x y all', function() { expect(true).ok; });
     obj.on('x y all', function() { expect(false).ok; }, obj);
     obj.off(null, null, obj);
@@ -308,7 +326,7 @@ describe("Backbone.Events", function() {
   });
 
   it("remove all events for a specific callback", function() {
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     var success = function() { expect(true).ok; };
     var fail = function() { expect(false).ok; };
     obj.on('x y all', success);
@@ -318,7 +336,7 @@ describe("Backbone.Events", function() {
   });
 
   it("#1310 - off does not skip consecutive events", function() {
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     obj.on('event', function() { expect(false).ok; }, obj);
     obj.on('event', function() { expect(false).ok; }, obj);
     obj.off(null, null, obj);
@@ -328,7 +346,7 @@ describe("Backbone.Events", function() {
   it("once", function() {
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = { counterA: 0, counterB: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
     var incrA = function(){ obj.counterA += 1; obj.trigger('event'); };
     var incrB = function(){ obj.counterB += 1; };
     obj.once('event', incrA);
@@ -341,8 +359,8 @@ describe("Backbone.Events", function() {
   it("once variant one", function() {
     var f = function(){ expect(true).ok; };
 
-    var a = _.extend({}, Backbone.Events).once('event', f);
-    var b = _.extend({}, Backbone.Events).on('event', f);
+    var a = _.extend({}, BackboneEvents).once('event', f);
+    var b = _.extend({}, BackboneEvents).on('event', f);
 
     a.trigger('event');
 
@@ -352,7 +370,7 @@ describe("Backbone.Events", function() {
 
   it("once variant two", function() {
     var f = function(){ expect(true).ok; };
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
 
     obj
       .once('event', f)
@@ -363,7 +381,7 @@ describe("Backbone.Events", function() {
 
   it("once with off", function() {
     var f = function(){ expect(true).ok; };
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
 
     obj.once('event', f);
     obj.off('event', f);
@@ -372,7 +390,7 @@ describe("Backbone.Events", function() {
 
   it("once with event maps", function() {
     var obj = { counter: 0 };
-    Backbone.Events.__mixin(obj);
+    BackboneEvents.__mixin(obj);
 
     var increment = function() {
       this.counter += 1;
@@ -399,7 +417,7 @@ describe("Backbone.Events", function() {
 
   it("once with off only by context", function() {
     var context = {};
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     obj.once('event', function(){ expect(false).ok; }, context);
     obj.off(null, null, context);
     obj.trigger('event');
@@ -407,20 +425,20 @@ describe("Backbone.Events", function() {
 
   it("once with asynchronous events", function(done) {
     var func = _.debounce(done, 50);
-    var obj = _.extend({}, Backbone.Events).once('async', func);
+    var obj = _.extend({}, BackboneEvents).once('async', func);
 
     obj.trigger('async');
     obj.trigger('async');
   });
 
   it("once with multiple events.", function() {
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     obj.once('x y', function() { expect(true).ok; });
     obj.trigger('x y');
   });
 
   it("Off during iteration with once.", function() {
-    var obj = Backbone.Events.__mixin({});
+    var obj = BackboneEvents.__mixin({});
     var f = function(){ this.off('event', f); };
     obj.on('event', f);
     obj.once('event', function(){});
@@ -431,12 +449,12 @@ describe("Backbone.Events", function() {
   });
 
   it("once without a callback is a noop", function() {
-    _.extend({}, Backbone.Events).once('event').trigger('event');
+    _.extend({}, BackboneEvents).once('event').trigger('event');
   });
 
   it("event functions are chainable", function() {
-    var obj = Backbone.Events.__mixin({});
-    var obj2 = _.extend({}, Backbone.Events);
+    var obj = BackboneEvents.__mixin({});
+    var obj2 = _.extend({}, BackboneEvents);
     var fn = function() {};
     expect(obj).eql(obj.trigger('noeventssetyet'));
     expect(obj).eql(obj.off('noeventssetyet'));

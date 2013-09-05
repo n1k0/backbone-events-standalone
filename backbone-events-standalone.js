@@ -18,7 +18,7 @@
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
  */
-(function(root) {
+(function() {
   var root = this,
       breaker = {},
       nativeForEach = Array.prototype.forEach,
@@ -29,7 +29,7 @@
   // Just skip if Backbone is already available in this context
   if ('Backbone' in root)
     return;
-  root.Backbone = {};
+  var Backbone = {};
 
   // Returns a partial implementation matching the minimal API subset required
   // by Backbone.Events
@@ -260,6 +260,13 @@
     return _.extend(proto, this);
   };
 
-  // supplementary alias
-  root.BackboneEvents = Events;
-})(this.window || this.exports);
+  // Export BackboneEvents depending on current context
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = Events;
+    }
+    exports.BackboneEvents = Events;
+  } else {
+    root.BackboneEvents = Events;
+  }
+})(this);
