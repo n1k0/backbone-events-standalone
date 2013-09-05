@@ -8,9 +8,9 @@ standalone (no external dependency), in the browser or in a nodejs environment.
 
 ## Oh dear. Why another EventEmitter?
 
-This project started because I appreciate the `Backbone.Events` interface while
-I wanted to keep using it within non-DOM environments (think a [Social API Web
-Worker] for example).
+This project started because I appreciate the `Backbone.Events` interface &
+features while I wanted to keep using it within non-DOM environments (think a
+[Social API Web Worker] for example).
 
 I've ported the [original Backbone.Events tests] to [mocha] & [chai] so I can
 run them within a [nodejs] environment and ensure the extracted API actually
