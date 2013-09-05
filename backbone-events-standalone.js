@@ -18,6 +18,7 @@
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
  */
+/* global define, module */
 (function() {
   var root = this,
       breaker = {},
@@ -82,9 +83,7 @@
     };
   }
 
-  var _ = miniscore(),
-      Events,
-      BackboneEvents;
+  var _ = miniscore(), Events;
 
   // Backbone.Events
   // ---------------
@@ -99,7 +98,7 @@
   //     object.on('expand', function(){ alert('expanded'); });
   //     object.trigger('expand');
   //
-  Events = BackboneEvents = {
+  Events = {
 
     // Bind an event to a `callback` function. Passing `"all"` will bind
     // the callback to all events fired.
@@ -257,8 +256,13 @@
     return _.extend(proto, this);
   };
 
-  // Export BackboneEvents depending on current context
-  if (typeof exports !== 'undefined') {
+  // Export Events as BackboneEvents depending on current context
+  if (typeof define === "function") {
+    define(function() {
+      return Events;
+    });
+  } else if (typeof exports !== 'undefined') {
+    var exports;
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = Events;
     }
