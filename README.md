@@ -1,13 +1,71 @@
 backbone-events-standalone
 ==========================
 
-This is an extraction of the [Events] module of [Backbone]. I can be used
-standalone, both in a (modern) browser and in a nodejs environment.
+This is an extraction of the [Events] module of [Backbone] which can be used
+standalone (no external dependency), in the browser or in a nodejs environment.
 
-## Why another EventEmitter?
+## Oh dear. Why another EventEmitter?
 
 This project started because I appreciate the `Backbone.Events` interface while
-I wanted to keep using it within a non-DOM environments.
+I wanted to keep using it within non-DOM environments.
+
+I've ported the [original Backbone.Events tests] to [mocha] & [chai] so I can
+run them within a [nodejs] environment and ensure the extracted API actually
+works as expected without the burden of setting up continuous integration of
+browser tests.
+
+## Installation
+
+### Bower
+
+TODO
+
+### NPM
+
+```
+$ npm install backbone-events-standalone
+```
+
+## Usage
+
+### In the browser
+
+```html
+<script src="backbone-events-standalone.js"></script>
+<script>
+  // use BackboneEvents
+</script>
+```
+
+### In nodejs
+
+```js
+var BackboneEvents = require("backbone-events-standalone");
+```
+
+### API
+
+The `__mixin` method helps extending any object or prototype to add eventing
+support to it:
+
+```
+var myEventEmitter = Backbone.Events.__mixin({});
+myEventEmitter.on("foo", console.log).trigger("foo", "hello emitter");
+
+// alternatively
+function Plop() {}
+BackboneEvents.__mixin(Plop);
+
+new Plop().on("foo", console.log).trigger("foo", "hello emitter");
+```
+
+`BackboneEvents` API & usage is the same as [Backbone.Events].
+
+## Test
+
+```
+$ npm test
+```
 
 ## License
 
@@ -18,4 +76,9 @@ MIT
 [Jeremy Ashkenas](http://ashkenas.com/), Backbone author
 
 [Events]: http://backbonejs.org/#Events
+[Backbone.Events]: http://backbonejs.org/#Events
 [Backbone]: http://backbonejs.org/
+[mocha]: (http://visionmedia.github.io/mocha/)
+[chai]: http://chaijs.com/
+[nodejs]: nodejs.org/
+[original Backbone.Events tests]: https://github.com/jashkenas/backbone/blob/699fe3271262043bb137bae97bd0003d6d193f27/test/events.js
