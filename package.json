@@ -1,7 +1,7 @@
 {
   "name": "backbone-events-standalone",
   "description": "Standalone version of Backbone.Events",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Nicolas Perriault <nicolas@perriault.net>",
   "repository": {
     "type": "git",
