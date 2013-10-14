@@ -29,6 +29,14 @@ describe("BackboneEvents", function() {
         done();
       }).trigger("foo", "hello emitter");
     });
+
+    it("should only augment prototype with expected methods", function() {
+      function Plop() {}
+      Plop.prototype.foo = function(){};
+      BackboneEvents.mixin(Plop.prototype);
+      expect(Plop.prototype).to.have.keys(['foo', 'on','once', 'off', 'trigger',
+        'stopListening', 'listenTo', 'listenToOnce', 'bind', 'unbind']);
+      });
   });
 
   // ported from Backbone.Events tests

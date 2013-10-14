@@ -59,17 +59,6 @@
         }
       },
 
-      extend: function(obj) {
-        this.each(slice.call(arguments, 1), function(source) {
-          if (source) {
-            for (var prop in source) {
-              obj[prop] = source[prop];
-            }
-          }
-        });
-        return obj;
-      },
-
       once: function(func) {
         var ran = false, memo;
         return function() {
@@ -253,7 +242,12 @@
 
   // Mixin utility
   Events.mixin = function(proto) {
-    return _.extend(proto, this);
+    var exports = ['on', 'once', 'off', 'trigger', 'stopListening', 'listenTo',
+                   'listenToOnce', 'bind', 'unbind'];
+    _.each(exports, function(name) {
+      proto[name] = this[name];
+    }, this);
+    return proto;
   };
 
   // Export Events as BackboneEvents depending on current context
