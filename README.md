@@ -84,6 +84,10 @@ BackboneEvents.mixin(Plop.prototype);
 $ npm test
 ```
 
+### Browser tests
+
+[![browser support](https://ci.testling.com/n1k0/backbone-events-standalone.png)](https://ci.testling.com/n1k0/backbone-events-standalone)
+
 ## License
 
 MIT
