@@ -197,6 +197,20 @@ describe("BackboneEvents", function() {
     expect(true).ok;
   });
 
+  it("stopListening cleans up references", function() {
+    var a = _.extend({}, BackboneEvents);
+    var b = _.extend({}, BackboneEvents);
+    var fn = function() {};
+    a.listenTo(b, 'all', fn).stopListening();
+    expect(_.size(a._listeners)).eql(0);
+    a.listenTo(b, 'all', fn).stopListening(b);
+    expect(_.size(a._listeners)).eql(0);
+    a.listenTo(b, 'all', fn).stopListening(null, 'all');
+    expect(_.size(a._listeners)).eql(0);
+    a.listenTo(b, 'all', fn).stopListening(null, null, fn);
+    expect(_.size(a._listeners)).eql(0);
+  });
+
   it("trigger all for each event", function() {
     var a, b, obj = { counter: 0 };
     BackboneEvents.mixin(obj);

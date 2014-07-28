@@ -23,8 +23,10 @@
   var root = this,
       breaker = {},
       nativeForEach = Array.prototype.forEach,
+      nativeIsArray = Array.isArray,
       hasOwnProperty = Object.prototype.hasOwnProperty,
       slice = Array.prototype.slice,
+      toString = Object.prototype.toString,
       idCounter = 0;
 
   // Returns a partial implementation matching the minimal API subset required
@@ -68,6 +70,21 @@
           func = null;
           return memo;
         };
+      },
+
+      isArray: nativeIsArray || function(obj) {
+        return toString.call(obj) == '[object Array]';
+      },
+
+      isString: function(obj) {
+        return toString.call(obj) == '[object String]';
+      },
+
+      isEmpty: function(obj) {
+        if (obj == null) return true;
+        if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+        for (var key in obj) if (_.has(obj, key)) return false;
+        return true;
       }
     };
   }
@@ -166,11 +183,12 @@
       var listeners = this._listeners;
       if (!listeners) return this;
       var deleteListener = !name && !callback;
-      if (typeof name === 'object') callback = this;
+      if (!callback && typeof name === 'object') callback = this;
       if (obj) (listeners = {})[obj._listenerId] = obj;
       for (var id in listeners) {
-        listeners[id].off(name, callback, this);
-        if (deleteListener) delete this._listeners[id];
+        obj = listeners[id];
+        obj.off(name, callback, this);
+        if (deleteListener || _.isEmpty(obj._events)) delete this._listeners[id];
       }
       return this;
     }
@@ -230,7 +248,7 @@
       var listeners = this._listeners || (this._listeners = {});
       var id = obj._listenerId || (obj._listenerId = _.uniqueId('l'));
       listeners[id] = obj;
-      if (typeof name === 'object') callback = this;
+      if (!callback && typeof name === 'object') callback = this;
       obj[implementation](name, callback, this);
       return this;
     };
