@@ -31,7 +31,18 @@
   // by Backbone.Events
   function miniscore() {
     return {
-      keys: Object.keys,
+      keys: Object.keys || function (obj) {
+        if (typeof obj !== "object" && typeof obj !== "function" || obj === null) {
+          throw new TypeError("keys() called on a non-object");
+        }
+        var key, keys = [];
+        for (key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            keys[keys.length] = key;
+          }
+        }
+        return keys;
+      },
 
       uniqueId: function(prefix) {
         var id = ++idCounter + '';
