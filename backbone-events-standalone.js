@@ -262,15 +262,15 @@
   };
 
   // Export Events as BackboneEvents depending on current context
-  if (typeof define === "function") {
-    define(function() {
-      return Events;
-    });
-  } else if (typeof exports !== 'undefined') {
+  if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = Events;
     }
     exports.BackboneEvents = Events;
+  }else if (typeof define === "function") {
+    define(function() {
+      return Events;
+    });
   } else {
     root.BackboneEvents = Events;
   }
