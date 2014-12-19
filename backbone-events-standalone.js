@@ -21,7 +21,6 @@
 /* global exports:true, define, module */
 (function() {
   var root = this,
-      breaker = {},
       nativeForEach = Array.prototype.forEach,
       hasOwnProperty = Object.prototype.hasOwnProperty,
       slice = Array.prototype.slice,
@@ -59,12 +58,12 @@
           obj.forEach(iterator, context);
         } else if (obj.length === +obj.length) {
           for (var i = 0, l = obj.length; i < l; i++) {
-            if (iterator.call(context, obj[i], i, obj) === breaker) return;
+            iterator.call(context, obj[i], i, obj);
           }
         } else {
           for (var key in obj) {
             if (this.has(obj, key)) {
-              if (iterator.call(context, obj[key], key, obj) === breaker) return;
+              iterator.call(context, obj[key], key, obj);
             }
           }
         }
