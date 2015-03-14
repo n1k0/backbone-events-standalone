@@ -1,7 +1,7 @@
 {
   "name": "backbone-events-standalone",
   "main": "backbone-events-standalone.js",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "homepage": "https://github.com/n1k0/backbone-events-standalone",
   "authors": [
     "Nicolas Perriault <nicolas@perriault.net>"
