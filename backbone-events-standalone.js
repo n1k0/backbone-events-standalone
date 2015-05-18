@@ -266,7 +266,7 @@
       exports = module.exports = Events;
     }
     exports.BackboneEvents = Events;
-  }else if (typeof define === "function") {
+  }else if (typeof define === "function"  && typeof define.amd == "object") {
     define(function() {
       return Events;
     });
