@@ -18,259 +18,289 @@
  * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
  * (c) 2013 Nicolas Perriault
  */
-/* global exports:true, define, module */
-(function() {
-  var root = this,
-      nativeForEach = Array.prototype.forEach,
-      hasOwnProperty = Object.prototype.hasOwnProperty,
-      slice = Array.prototype.slice,
-      idCounter = 0;
 
-  // Returns a partial implementation matching the minimal API subset required
-  // by Backbone.Events
-  function miniscore() {
-    return {
-      keys: Object.keys || function (obj) {
-        if (typeof obj !== "object" && typeof obj !== "function" || obj === null) {
-          throw new TypeError("keys() called on a non-object");
-        }
-        var key, keys = [];
-        for (key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            keys[keys.length] = key;
-          }
-        }
-        return keys;
-      },
+// Returns a partial implementation matching the minimal API subset required
+// by Backbone.Events
+var _ = {
+  keys: require('lodash/object/keys'),
+  uniqueId: require('lodash/utility/uniqueId'),
+  each: require('lodash/collection/forEach'),
+  once: require('lodash/function/once'),
+  bind: require('lodash/function/bind'),
+  size: require('lodash/collection/size'),
+  isEmpty: require('lodash/lang/isEmpty')
+};
 
-      uniqueId: function(prefix) {
-        var id = ++idCounter + '';
-        return prefix ? prefix + id : id;
-      },
+// Backbone.Events
+// v1.2.3
+// ---------------
 
-      has: function(obj, key) {
-        return hasOwnProperty.call(obj, key);
-      },
+// A module that can be mixed in to *any object* in order to provide it with
+// a custom event channel. You may bind a callback to an event with `on` or
+// remove with `off`; `trigger`-ing an event fires all callbacks in
+// succession.
+//
+//     var object = {};
+//     _.extend(object, Backbone.Events);
+//     object.on('expand', function(){ alert('expanded'); });
+//     object.trigger('expand');
+//
+var Events = {};
 
-      each: function(obj, iterator, context) {
-        if (obj == null) return;
-        if (nativeForEach && obj.forEach === nativeForEach) {
-          obj.forEach(iterator, context);
-        } else if (obj.length === +obj.length) {
-          for (var i = 0, l = obj.length; i < l; i++) {
-            iterator.call(context, obj[i], i, obj);
-          }
-        } else {
-          for (var key in obj) {
-            if (this.has(obj, key)) {
-              iterator.call(context, obj[key], key, obj);
-            }
-          }
-        }
-      },
+// Regular expression used to split event strings.
+var eventSplitter = /\s+/;
 
-      once: function(func) {
-        var ran = false, memo;
-        return function() {
-          if (ran) return memo;
-          ran = true;
-          memo = func.apply(this, arguments);
-          func = null;
-          return memo;
-        };
-      }
-    };
-  }
-
-  var _ = miniscore(), Events;
-
-  // Backbone.Events
-  // ---------------
-
-  // A module that can be mixed in to *any object* in order to provide it with
-  // custom events. You may bind with `on` or remove with `off` callback
-  // functions to an event; `trigger`-ing an event fires all callbacks in
-  // succession.
-  //
-  //     var object = {};
-  //     _.extend(object, Backbone.Events);
-  //     object.on('expand', function(){ alert('expanded'); });
-  //     object.trigger('expand');
-  //
-  Events = {
-
-    // Bind an event to a `callback` function. Passing `"all"` will bind
-    // the callback to all events fired.
-    on: function(name, callback, context) {
-      if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
-      this._events || (this._events = {});
-      var events = this._events[name] || (this._events[name] = []);
-      events.push({callback: callback, context: context, ctx: context || this});
-      return this;
-    },
-
-    // Bind an event to only be triggered a single time. After the first time
-    // the callback is invoked, it will be removed.
-    once: function(name, callback, context) {
-      if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
-      var self = this;
-      var once = _.once(function() {
-        self.off(name, once);
-        callback.apply(this, arguments);
-      });
-      once._callback = callback;
-      return this.on(name, once, context);
-    },
-
-    // Remove one or many callbacks. If `context` is null, removes all
-    // callbacks with that function. If `callback` is null, removes all
-    // callbacks for the event. If `name` is null, removes all bound
-    // callbacks for all events.
-    off: function(name, callback, context) {
-      var retain, ev, events, names, i, l, j, k;
-      if (!this._events || !eventsApi(this, 'off', name, [callback, context])) return this;
-      if (!name && !callback && !context) {
-        this._events = {};
-        return this;
-      }
-
-      names = name ? [name] : _.keys(this._events);
-      for (i = 0, l = names.length; i < l; i++) {
-        name = names[i];
-        if (events = this._events[name]) {
-          this._events[name] = retain = [];
-          if (callback || context) {
-            for (j = 0, k = events.length; j < k; j++) {
-              ev = events[j];
-              if ((callback && callback !== ev.callback && callback !== ev.callback._callback) ||
-                  (context && context !== ev.context)) {
-                retain.push(ev);
-              }
-            }
-          }
-          if (!retain.length) delete this._events[name];
-        }
-      }
-
-      return this;
-    },
-
-    // Trigger one or many events, firing all bound callbacks. Callbacks are
-    // passed the same arguments as `trigger` is, apart from the event name
-    // (unless you're listening on `"all"`, which will cause your callback to
-    // receive the true name of the event as the first argument).
-    trigger: function(name) {
-      if (!this._events) return this;
-      var args = slice.call(arguments, 1);
-      if (!eventsApi(this, 'trigger', name, args)) return this;
-      var events = this._events[name];
-      var allEvents = this._events.all;
-      if (events) triggerEvents(events, args);
-      if (allEvents) triggerEvents(allEvents, arguments);
-      return this;
-    },
-
-    // Tell this object to stop listening to either specific events ... or
-    // to every object it's currently listening to.
-    stopListening: function(obj, name, callback) {
-      var listeners = this._listeners;
-      if (!listeners) return this;
-      var deleteListener = !name && !callback;
-      if (typeof name === 'object') callback = this;
-      if (obj) (listeners = {})[obj._listenerId] = obj;
-      for (var id in listeners) {
-        listeners[id].off(name, callback, this);
-        if (deleteListener) delete this._listeners[id];
-      }
-      return this;
-    }
-
-  };
-
-  // Regular expression used to split event strings.
-  var eventSplitter = /\s+/;
-
-  // Implement fancy features of the Events API such as multiple event
-  // names `"change blur"` and jQuery-style event maps `{change: action}`
-  // in terms of the existing API.
-  var eventsApi = function(obj, action, name, rest) {
-    if (!name) return true;
-
+// Iterates over the standard `event, callback` (as well as the fancy multiple
+// space-separated events `"change blur", callback` and jQuery-style event
+// maps `{event: callback}`).
+var eventsApi = function(iteratee, events, name, callback, opts) {
+  var i = 0, names;
+  if (name && typeof name === 'object') {
     // Handle event maps.
-    if (typeof name === 'object') {
-      for (var key in name) {
-        obj[action].apply(obj, [key, name[key]].concat(rest));
-      }
-      return false;
+    if (callback !== void 0 && 'context' in opts && opts.context === void 0) opts.context = callback;
+    for (names = _.keys(name); i < names.length ; i++) {
+      events = eventsApi(iteratee, events, names[i], name[names[i]], opts);
     }
-
-    // Handle space separated event names.
-    if (eventSplitter.test(name)) {
-      var names = name.split(eventSplitter);
-      for (var i = 0, l = names.length; i < l; i++) {
-        obj[action].apply(obj, [names[i]].concat(rest));
-      }
-      return false;
+  } else if (name && eventSplitter.test(name)) {
+    // Handle space separated event names by delegating them individually.
+    for (names = name.split(eventSplitter); i < names.length; i++) {
+      events = iteratee(events, names[i], callback, opts);
     }
+  } else {
+    // Finally, standard events.
+    events = iteratee(events, name, callback, opts);
+  }
+  return events;
+};
 
-    return true;
-  };
+// Bind an event to a `callback` function. Passing `"all"` will bind
+// the callback to all events fired.
+Events.on = function(name, callback, context) {
+  return internalOn(this, name, callback, context);
+};
 
-  // A difficult-to-believe, but optimized internal dispatch function for
-  // triggering events. Tries to keep the usual cases speedy (most internal
-  // Backbone events have 3 arguments).
-  var triggerEvents = function(events, args) {
-    var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
-    switch (args.length) {
-      case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
-      case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
-      case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
-      case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
-      default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args);
-    }
-  };
-
-  var listenMethods = {listenTo: 'on', listenToOnce: 'once'};
-
-  // Inversion-of-control versions of `on` and `once`. Tell *this* object to
-  // listen to an event in another object ... keeping track of what it's
-  // listening to.
-  _.each(listenMethods, function(implementation, method) {
-    Events[method] = function(obj, name, callback) {
-      var listeners = this._listeners || (this._listeners = {});
-      var id = obj._listenerId || (obj._listenerId = _.uniqueId('l'));
-      listeners[id] = obj;
-      if (typeof name === 'object') callback = this;
-      obj[implementation](name, callback, this);
-      return this;
-    };
+// Guard the `listening` argument from the public API.
+var internalOn = function(obj, name, callback, context, listening) {
+  obj._events = eventsApi(onApi, obj._events || {}, name, callback, {
+      context: context,
+      ctx: obj,
+      listening: listening
   });
 
-  // Aliases for backwards compatibility.
-  Events.bind   = Events.on;
-  Events.unbind = Events.off;
-
-  // Mixin utility
-  Events.mixin = function(proto) {
-    var exports = ['on', 'once', 'off', 'trigger', 'stopListening', 'listenTo',
-                   'listenToOnce', 'bind', 'unbind'];
-    _.each(exports, function(name) {
-      proto[name] = this[name];
-    }, this);
-    return proto;
-  };
-
-  // Export Events as BackboneEvents depending on current context
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Events;
-    }
-    exports.BackboneEvents = Events;
-  }else if (typeof define === "function"  && typeof define.amd == "object") {
-    define(function() {
-      return Events;
-    });
-  } else {
-    root.BackboneEvents = Events;
+  if (listening) {
+    var listeners = obj._listeners || (obj._listeners = {});
+    listeners[listening.id] = listening;
   }
-})(this);
+
+  return obj;
+};
+
+// Inversion-of-control versions of `on`. Tell *this* object to listen to
+// an event in another object... keeping track of what it's listening to
+// for easier unbinding later.
+Events.listenTo =  function(obj, name, callback) {
+  if (!obj) return this;
+  var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
+  var listeningTo = this._listeningTo || (this._listeningTo = {});
+  var listening = listeningTo[id];
+
+  // This object is not listening to any other events on `obj` yet.
+  // Setup the necessary references to track the listening callbacks.
+  if (!listening) {
+    var thisId = this._listenId || (this._listenId = _.uniqueId('l'));
+    listening = listeningTo[id] = {obj: obj, objId: id, id: thisId, listeningTo: listeningTo, count: 0};
+  }
+
+  // Bind callbacks on obj, and keep track of them on listening.
+  internalOn(obj, name, callback, this, listening);
+  return this;
+};
+
+// The reducing API that adds a callback to the `events` object.
+var onApi = function(events, name, callback, options) {
+  if (callback) {
+    var handlers = events[name] || (events[name] = []);
+    var context = options.context, ctx = options.ctx, listening = options.listening;
+    if (listening) listening.count++;
+
+    handlers.push({ callback: callback, context: context, ctx: context || ctx, listening: listening });
+  }
+  return events;
+};
+
+// Remove one or many callbacks. If `context` is null, removes all
+// callbacks with that function. If `callback` is null, removes all
+// callbacks for the event. If `name` is null, removes all bound
+// callbacks for all events.
+Events.off =  function(name, callback, context) {
+  if (!this._events) return this;
+  this._events = eventsApi(offApi, this._events, name, callback, {
+      context: context,
+      listeners: this._listeners
+  });
+  return this;
+};
+
+// Tell this object to stop listening to either specific events ... or
+// to every object it's currently listening to.
+Events.stopListening =  function(obj, name, callback) {
+  var listeningTo = this._listeningTo;
+  if (!listeningTo) return this;
+
+  var ids = obj ? [obj._listenId] : _.keys(listeningTo);
+
+  for (var i = 0; i < ids.length; i++) {
+    var listening = listeningTo[ids[i]];
+
+    // If listening doesn't exist, this object is not currently
+    // listening to obj. Break out early.
+    if (!listening) break;
+
+    listening.obj.off(name, callback, this);
+  }
+  if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
+
+  return this;
+};
+
+// The reducing API that removes a callback from the `events` object.
+var offApi = function(events, name, callback, options) {
+  if (!events) return;
+
+  var i = 0, listening;
+  var context = options.context, listeners = options.listeners;
+
+  // Delete all events listeners and "drop" events.
+  if (!name && !callback && !context) {
+    var ids = _.keys(listeners);
+    for (; i < ids.length; i++) {
+      listening = listeners[ids[i]];
+      delete listeners[listening.id];
+      delete listening.listeningTo[listening.objId];
+    }
+    return;
+  }
+
+  var names = name ? [name] : _.keys(events);
+  for (; i < names.length; i++) {
+    name = names[i];
+    var handlers = events[name];
+
+    // Bail out if there are no events stored.
+    if (!handlers) break;
+
+    // Replace events if there are any remaining.  Otherwise, clean up.
+    var remaining = [];
+    for (var j = 0; j < handlers.length; j++) {
+      var handler = handlers[j];
+      if (
+        callback && callback !== handler.callback &&
+          callback !== handler.callback._callback ||
+            context && context !== handler.context
+      ) {
+        remaining.push(handler);
+      } else {
+        listening = handler.listening;
+        if (listening && --listening.count === 0) {
+          delete listeners[listening.id];
+          delete listening.listeningTo[listening.objId];
+        }
+      }
+    }
+
+    // Update tail event if the list has any events.  Otherwise, clean up.
+    if (remaining.length) {
+      events[name] = remaining;
+    } else {
+      delete events[name];
+    }
+  }
+  if (_.size(events)) return events;
+};
+
+// Bind an event to only be triggered a single time. After the first time
+// the callback is invoked, its listener will be removed. If multiple events
+// are passed in using the space-separated syntax, the handler will fire
+// once for each event, not once for a combination of all events.
+Events.once =  function(name, callback, context) {
+  // Map the event into a `{event: once}` object.
+  var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
+  return this.on(events, void 0, context);
+};
+
+// Inversion-of-control versions of `once`.
+Events.listenToOnce =  function(obj, name, callback) {
+  // Map the event into a `{event: once}` object.
+  var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
+  return this.listenTo(obj, events);
+};
+
+// Reduces the event callbacks into a map of `{event: onceWrapper}`.
+// `offer` unbinds the `onceWrapper` after it has been called.
+var onceMap = function(map, name, callback, offer) {
+  if (callback) {
+    var once = map[name] = _.once(function() {
+      offer(name, once);
+      callback.apply(this, arguments);
+    });
+    once._callback = callback;
+  }
+  return map;
+};
+
+// Trigger one or many events, firing all bound callbacks. Callbacks are
+// passed the same arguments as `trigger` is, apart from the event name
+// (unless you're listening on `"all"`, which will cause your callback to
+// receive the true name of the event as the first argument).
+Events.trigger =  function(name) {
+  if (!this._events) return this;
+
+  var length = Math.max(0, arguments.length - 1);
+  var args = Array(length);
+  for (var i = 0; i < length; i++) args[i] = arguments[i + 1];
+
+  eventsApi(triggerApi, this._events, name, void 0, args);
+  return this;
+};
+
+// Handles triggering the appropriate event callbacks.
+var triggerApi = function(objEvents, name, cb, args) {
+  if (objEvents) {
+    var events = objEvents[name];
+    var allEvents = objEvents.all;
+    if (events && allEvents) allEvents = allEvents.slice();
+    if (events) triggerEvents(events, args);
+    if (allEvents) triggerEvents(allEvents, [name].concat(args));
+  }
+  return objEvents;
+};
+
+// A difficult-to-believe, but optimized internal dispatch function for
+// triggering events. Tries to keep the usual cases speedy (most internal
+// Backbone events have 3 arguments).
+var triggerEvents = function(events, args) {
+  var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
+  switch (args.length) {
+    case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
+    case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
+    case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
+    case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
+    default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args); return;
+  }
+};
+
+// Aliases for backwards compatibility.
+Events.bind   = Events.on;
+Events.unbind = Events.off;
+
+// Mixin utility
+Events.mixin = function(proto) {
+  var exports = ['on', 'once', 'off', 'trigger', 'stopListening', 'listenTo',
+                 'listenToOnce', 'bind', 'unbind'];
+  _.each(exports, function(name) {
+    proto[name] = this[name];
+  }, this);
+  return proto;
+};
+
+module.exports = Events;

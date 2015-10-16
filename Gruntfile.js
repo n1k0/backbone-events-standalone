@@ -1,21 +1,29 @@
 module.exports = function(grunt) {
-
+  var webpack = require('webpack');
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    uglify: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        report: 'min'
-      },
-      dist: {
-        files: {
-          '<%= pkg.name %>.min.js': ['<%= pkg.name %>.js']
-        }
+
+    webpack: {
+      backboneEvents: {
+        entry: "./backbone-events-standalone.js",
+        output: {
+          path: ".",
+          filename: "backbone-events-standalone.min.js",
+          libraryTarget: "umd",
+          library: "BackboneEvents"
+        },
+
+        stats: false,
+
+        failOnError: true,
+        plugins: [
+          new webpack.optimize.UglifyJsPlugin({ })
+        ]
       }
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-webpack');
 
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask('default', ['webpack']);
 };

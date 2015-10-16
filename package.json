@@ -12,14 +12,17 @@
     "backbone",
     "events"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "3.x.x"
+  },
   "devDependencies": {
-    "mocha": "1.8.x",
     "chai": "1.5.x",
-    "jshint": "2.x",
-    "underscore": "1.4.x",
     "grunt": "0.4.x",
-    "grunt-contrib-uglify": "0.2.x"
+    "grunt-webpack": "^1.0.11",
+    "jshint": "2.x",
+    "mocha": "1.8.x",
+    "underscore": "1.4.x",
+    "webpack": "^1.12.2"
   },
   "scripts": {
     "test": "mocha"
