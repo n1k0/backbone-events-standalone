@@ -7,6 +7,7 @@
     "type": "git",
     "url": "https://github.com/n1k0/backbone-events-standalone.git"
   },
+  "main": "backbone-events-standalone.js",
   "license": "MIT",
   "keywords": [
     "backbone",

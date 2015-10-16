@@ -2,7 +2,7 @@
 /* jshint expr:true */
 var expect = require("chai").expect;
 var _ = require("underscore");
-var BackboneEvents = require("./index");
+var BackboneEvents = require("./");
 
 describe("BackboneEvents", function() {
   // added by backbone-events-standalone
