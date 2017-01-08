@@ -95,7 +95,7 @@ MIT
 [Events]: http://backbonejs.org/#Events
 [Backbone.Events]: http://backbonejs.org/#Events
 [Backbone]: http://backbonejs.org/
-[mocha]: (http://visionmedia.github.io/mocha/)
+[mocha]: (http://mochajs.org/)
 [chai]: http://chaijs.com/
 [nodejs]: nodejs.org/
 [original Backbone.Events tests]: https://github.com/jashkenas/backbone/blob/699fe3271262043bb137bae97bd0003d6d193f27/test/events.js
