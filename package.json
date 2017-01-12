@@ -1,25 +1,29 @@
 {
   "name": "backbone-events-standalone",
   "description": "Standalone version of Backbone.Events",
-  "version": "0.2.7",
+  "version": "1.0.0",
   "author": "Nicolas Perriault <nicolas@perriault.net>",
   "repository": {
     "type": "git",
     "url": "https://github.com/n1k0/backbone-events-standalone.git"
   },
+  "main": "backbone-events-standalone.js",
   "license": "MIT",
   "keywords": [
     "backbone",
     "events"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "3.x.x"
+  },
   "devDependencies": {
-    "mocha": "1.8.x",
     "chai": "1.5.x",
-    "jshint": "2.x",
-    "underscore": "1.4.x",
     "grunt": "0.4.x",
-    "grunt-contrib-uglify": "0.2.x"
+    "grunt-webpack": "^1.0.11",
+    "jshint": "2.x",
+    "mocha": "1.8.x",
+    "underscore": "1.4.x",
+    "webpack": "^1.12.2"
   },
   "scripts": {
     "test": "mocha"

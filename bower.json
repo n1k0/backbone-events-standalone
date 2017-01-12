@@ -1,6 +1,6 @@
 {
   "name": "backbone-events-standalone",
-  "main": "backbone-events-standalone.js",
+  "main": "backbone-events-standalone.min.js",
   "version": "0.2.7",
   "homepage": "https://github.com/n1k0/backbone-events-standalone",
   "authors": [
